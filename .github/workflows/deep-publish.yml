@@ -1,0 +1,46 @@
+name: Deep publicar Quick Support
+run-name: Deep publicar Quick Support
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: 'ID da execucao do Deep Quick Support que gerou o exe'
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      run_id:
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar o executavel
+        uses: actions/download-artifact@v8
+        with:
+          name: Acesso_Remoto_Deep_Tecnologia
+          run-id: ${{ inputs.run_id }}
+          github-token: ${{ github.token }}
+          path: ./out
+
+      - name: Renomear
+        run: |
+          ls -la ./out
+          mv ./out/*.exe ./out/Deep_QuickSupport.exe
+          sha256sum ./out/Deep_QuickSupport.exe
+
+      - name: Publicar no release fixo
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh release view quicksupport -R "$REPO" >/dev/null 2>&1 || \
+            gh release create quicksupport -R "$REPO" --title "Acesso Remoto Deep Tecnologia - Quick Support" \
+              --notes "Cliente de suporte da Deep Tecnologia. Baixe, execute e informe ao tecnico o ID e a senha que aparecem na tela." --latest
+          gh release upload quicksupport ./out/Deep_QuickSupport.exe -R "$REPO" --clobber

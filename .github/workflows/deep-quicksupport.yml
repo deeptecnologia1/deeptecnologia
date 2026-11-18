@@ -760,6 +760,15 @@ jobs:
       - name: Upload Deep client
         uses: actions/upload-artifact@v7
         with:
-          name: ${{ env.filename }}
+          name: Acesso_Remoto_Deep_Tecnologia
           path: ./SignOutput/${{ env.filename }}.exe
           retention-days: 30
+
+  publish:
+    needs: [build-for-windows-flutter]
+    permissions:
+      contents: write
+      actions: read
+    uses: ./.github/workflows/deep-publish.yml
+    with:
+      run_id: ${{ github.run_id }}
